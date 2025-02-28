@@ -1,0 +1,596 @@
+
+html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant de Prompting - Escape Game Pédagogique</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/dsfr.min.css">
+    <style>
+        @font-face {
+            font-family: 'Marianne';
+            src: url('https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/fonts/Marianne-Regular.woff2') format('woff2'),
+                 url('https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/fonts/Marianne-Regular.woff') format('woff');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'Marianne';
+            src: url('https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/fonts/Marianne-Bold.woff2') format('woff2'),
+                 url('https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.9.3/dist/fonts/Marianne-Bold.woff') format('woff');
+            font-weight: 700;
+            font-style: normal;
+        }
+        
+        body {
+            font-family: 'Marianne', sans-serif;
+            line-height: 1.6;
+            color: #1e1e1e;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f6f6f6;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            max-width: 150px;
+            margin-right: 20px;
+        }
+
+        h1, h2, h3 {
+            color: #000091;
+            font-family: 'Marianne', sans-serif;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #1e1e1e;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e5e5;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+            font-family: 'Marianne', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #000091;
+            outline: none;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        button {
+            background-color: #000091;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: 'Marianne', sans-serif;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #1212ff;
+        }
+
+        .output-container {
+            margin-top: 30px;
+            padding: 25px;
+            background-color: #000091;
+            color: white;
+            border-radius: 8px;
+            display: none;
+        }
+
+        #promptOutput {
+            white-space: pre-wrap;
+            font-family: 'Marianne', monospace;
+            background-color: #1b1b35;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            color: #ffffff;
+        }
+
+        .copy-btn {
+            background-color: #e1000f;
+            margin-top: 15px;
+        }
+
+        .copy-btn:hover {
+            background-color: #ff2a36;
+        }
+
+        .accordion {
+            background-color: #f0f0f0;
+            color: #000091;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            outline: none;
+            transition: 0.4s;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            border-left: 5px solid;
+        }
+
+        .accordion:nth-of-type(1) {
+            border-left-color: #e1000f;
+        }
+
+        .accordion:nth-of-type(3) {
+            border-left-color: #5770be;
+        }
+
+        .accordion:nth-of-type(5) {
+            border-left-color: #66a30d;
+        }
+
+        .accordion:nth-of-type(7) {
+            border-left-color: #a558a0;
+        }
+
+        .accordion:nth-of-type(9) {
+            border-left-color: #ff9940;
+        }
+
+        .active, .accordion:hover {
+            background-color: #e5e5e5;
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            border-radius: 0 0 5px 5px;
+            margin-bottom: 10px;
+            border-left: 5px solid #e5e5e5;
+        }
+
+        .panel:nth-of-type(2) {
+            border-left-color: #ffcccf;
+        }
+
+        .panel:nth-of-type(4) {
+            border-left-color: #d7e0ff;
+        }
+
+        .panel:nth-of-type(6) {
+            border-left-color: #e3f0cc;
+        }
+
+        .panel:nth-of-type(8) {
+            border-left-color: #f4d5f2;
+        }
+
+        .panel:nth-of-type(10) {
+            border-left-color: #ffe0c2;
+        }
+
+        .accordion:after {
+            content: '\02795'; /* Unicode character for "plus" sign (+) */
+            font-size: 13px;
+            color: #000091;
+            float: right;
+            margin-left: 5px;
+        }
+
+        .active:after {
+            content: "\2796"; /* Unicode character for "minus" sign (-) */
+        }
+
+        .intro-text {
+            background-color: #f3f6ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid #000091;
+        }
+
+        .section-title {
+            color: #000091;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .generate-btn-container {
+            margin-top: 30px;
+            text-align: center;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        #generateBtn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: linear-gradient(45deg, #000091, #5770be);
+        }
+
+        #generateBtn:hover {
+            background: linear-gradient(45deg, #1212ff, #7a8fd4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://maintenance-industrielle-pedagogie.web.ac-grenoble.fr/sites/default/files/styles/media_crop/public/media-images/2019-08/logo_canope_0.jpg?itok=G1aZ96u_" alt="Logo Canopé" class="logo">
+            <h1>Assistant de Prompting - Escape Game Pédagogique</h1>
+        </div>
+
+        <div class="intro-text">
+            <p>Remplissez les différentes sections pour générer un prompt détaillé qui vous aidera à créer un escape game pédagogique avec une IA. Cliquez sur chaque section pour la développer et saisir vos informations.</p>
+        </div>
+
+        <button class="accordion">Contexte pédagogique</button>
+        <div class="panel">
+            <div class="section-title">Définissez les objectifs et le cadre pédagogique</div>
+            
+            <div class="form-group">
+                <label for="learningObjectives">Objectifs d'apprentissage:</label>
+                <textarea id="learningObjectives" placeholder="Quelles compétences ou connaissances souhaitez-vous développer?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="targetAudience">Public cible:</label>
+                <input type="text" id="targetAudience" placeholder="Âge, niveau scolaire, contexte d'apprentissage...">
+            </div>
+
+            <div class="form-group">
+                <label for="duration">Durée souhaitée:</label>
+                <input type="text" id="duration" placeholder="Ex: 45 minutes, 1h30...">
+            </div>
+
+            <div class="form-group">
+                <label for="subjects">Discipline(s) concernée(s):</label>
+                <input type="text" id="subjects" placeholder="Mathématiques, histoire, sciences, langues...">
+            </div>
+
+            <div class="form-group">
+                <label for="constraints">Contraintes pédagogiques spécifiques:</label>
+                <textarea id="constraints" placeholder="Programme scolaire, compétences transversales..."></textarea>
+            </div>
+        </div>
+
+        <button class="accordion">Éléments narratifs</button>
+        <div class="panel">
+            <div class="section-title">Construisez l'univers et l'histoire de votre escape game</div>
+            
+            <div class="form-group">
+                <label for="theme">Thématique générale:</label>
+                <input type="text" id="theme" placeholder="Historique, scientifique, fantastique...">
+            </div>
+
+            <div class="form-group">
+                <label for="setting">Contexte spatio-temporel:</label>
+                <input type="text" id="setting" placeholder="Époque, lieu...">
+            </div>
+
+            <div class="form-group">
+                <label for="situation">Situation initiale et objectif final:</label>
+                <textarea id="situation" placeholder="Décrivez la situation de départ et ce que les participants doivent accomplir..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="characters">Personnages clés:</label>
+                <textarea id="characters" placeholder="Personnages réels ou fictifs à intégrer dans le scénario..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="tone">Ton général:</label>
+                <select id="tone">
+                    <option value="">Sélectionnez un ton</option>
+                    <option value="serious">Sérieux</option>
+                    <option value="humorous">Humoristique</option>
+                    <option value="mysterious">Mystérieux</option>
+                    <option value="adventurous">Aventureux</option>
+                    <option value="educational">Éducatif</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="accordion">Structure du jeu</button>
+        <div class="panel">
+            <div class="section-title">Définissez l'architecture et les mécanismes de votre escape game</div>
+            
+            <div class="form-group">
+                <label for="puzzleCount">Nombre d'énigmes ou de défis:</label>
+                <input type="number" id="puzzleCount" min="1" max="20" placeholder="Ex: 5">
+            </div>
+
+            <div class="form-group">
+                <label for="progression">Progression:</label>
+                <select id="progression">
+                    <option value="">Sélectionnez un type de progression</option>
+                    <option value="linear">Linéaire</option>
+                    <option value="nonlinear">Non-linéaire</option>
+                    <option value="mixed">Mixte</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="mechanisms">Types de mécanismes de jeu:</label>
+                <textarea id="mechanisms" placeholder="Codes, puzzles, manipulation d'objets..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="balance">Équilibre entre énigmes physiques et intellectuelles:</label>
+                <input type="text" id="balance" placeholder="Ex: 70% intellectuelles, 30% physiques">
+            </div>
+
+            <div class="form-group">
+                <label for="hints">Points de blocage potentiels et indices:</label>
+                <textarea id="hints" placeholder="Décrivez les difficultés anticipées et les indices à fournir..."></textarea>
+            </div>
+        </div>
+
+        <button class="accordion">Aspects pratiques</button>
+        <div class="panel">
+            <div class="section-title">Précisez les conditions matérielles et logistiques</div>
+            
+            <div class="form-group">
+                <label for="space">Espace disponible et contraintes matérielles:</label>
+                <textarea id="space" placeholder="Décrivez l'espace et les contraintes matérielles..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="budget">Budget et ressources disponibles:</label>
+                <input type="text" id="budget" placeholder="Ex: Budget limité, matériel scolaire standard...">
+            </div>
+
+            <div class="form-group">
+                <label for="participants">Nombre de participants et organisation des équipes:</label>
+                <input type="text" id="participants" placeholder="Ex: 30 élèves en groupes de 5...">
+            </div>
+
+            <div class="form-group">
+                <label for="digital">Possibilité d'utilisation d'outils numériques:</label>
+                <textarea id="digital" placeholder="Tablettes, ordinateurs, applications spécifiques..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="adaptability">Adaptabilité à différents contextes:</label>
+                <input type="text" id="adaptability" placeholder="Classe, maison, extérieur...">
+            </div>
+        </div>
+
+        <button class="accordion">Évaluation et suivi</button>
+        <div class="panel">
+            <div class="section-title">Planifiez l'évaluation des acquis et le suivi pédagogique</div>
+            
+            <div class="form-group">
+                <label for="assessment">Méthodes pour vérifier l'acquisition des connaissances:</label>
+                <textarea id="assessment" placeholder="Questionnaires, observations, productions..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="debriefing">Système de débriefing post-jeu:</label>
+                <textarea id="debriefing" placeholder="Comment allez-vous faire le bilan de l'activité?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="extension">Possibilités d'extension ou de modification du scénario:</label>
+                <textarea id="extension" placeholder="Variantes, suites, adaptations possibles..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="criteria">Critères de réussite pour les participants:</label>
+                <textarea id="criteria" placeholder="Comment évaluer la réussite des participants?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="documentation">Documentation pédagogique d'accompagnement:</label>
+                <textarea id="documentation" placeholder="Fiches, guides, ressources complémentaires..."></textarea>
+            </div>
+        </div>
+
+        <div class="generate-btn-container">
+            <button id="generateBtn" onclick="generatePrompt()">Générer le prompt</button>
+        </div>
+
+        <div class="output-container" id="outputContainer">
+            <h2>Votre prompt pour l'IA</h2>
+            <div id="promptOutput"></div>
+            <button class="copy-btn" onclick="copyToClipboard()">Copier le prompt</button>
+        </div>
+    </div>
+
+    <script>
+        // Gestion des accordéons
+        document.addEventListener('DOMContentLoaded', function() {
+            var acc = document.getElementsByClassName("accordion");
+            for (var i = 0; i < acc.length; i++) {
+                acc[i].addEventListener("click", function() {
+                    this.classList.toggle("active");
+                    var panel = this.nextElementSibling;
+                    if (panel.style.maxHeight) {
+                        panel.style.maxHeight = null;
+                    } else {
+                        panel.style.maxHeight = panel.scrollHeight + "px";
+                    }
+                });
+            }
+
+            // Ouvrir le premier accordéon par défaut
+            if (acc.length > 0) {
+                acc[0].click();
+            }
+        });
+
+        // Fonction pour générer le prompt
+        function generatePrompt() {
+            // Récupération des valeurs
+            const learningObjectives = document.getElementById('learningObjectives').value;
+            const targetAudience = document.getElementById('targetAudience').value;
+            const duration = document.getElementById('duration').value;
+            const subjects = document.getElementById('subjects').value;
+            const constraints = document.getElementById('constraints').value;
+
+            const theme = document.getElementById('theme').value;
+            const setting = document.getElementById('setting').value;
+            const situation = document.getElementById('situation').value;
+            const characters = document.getElementById('characters').value;
+            const tone = document.getElementById('tone').value;
+
+            const puzzleCount = document.getElementById('puzzleCount').value;
+            const progression = document.getElementById('progression').value;
+            const mechanisms = document.getElementById('mechanisms').value;
+            const balance = document.getElementById('balance').value;
+            const hints = document.getElementById('hints').value;
+
+            const space = document.getElementById('space').value;
+            const budget = document.getElementById('budget').value;
+            const participants = document.getElementById('participants').value;
+            const digital = document.getElementById('digital').value;
+            const adaptability = document.getElementById('adaptability').value;
+
+            const assessment = document.getElementById('assessment').value;
+            const debriefing = document.getElementById('debriefing').value;
+            const extension = document.getElementById('extension').value;
+            const criteria = document.getElementById('criteria').value;
+            const documentation = document.getElementById('documentation').value;
+
+            // Construction du prompt
+            let prompt = `Tu es un expert en conception d'escape games pédagogiques. Je souhaite que tu me génères un scénario complet d'escape game pédagogique en suivant les spécifications ci-dessous.
+
+CONTEXTE PÉDAGOGIQUE:
+- Objectifs d'apprentissage: ${learningObjectives || "[À compléter]"}
+- Public cible: ${targetAudience || "[À compléter]"}
+- Durée souhaitée: ${duration || "[À compléter]"}
+- Discipline(s) concernée(s): ${subjects || "[À compléter]"}
+- Contraintes pédagogiques: ${constraints || "[À compléter]"}
+
+ÉLÉMENTS NARRATIFS:
+- Thématique générale: ${theme || "[À compléter]"}
+- Contexte spatio-temporel: ${setting || "[À compléter]"}
+- Situation initiale et objectif: ${situation || "[À compléter]"}
+- Personnages clés: ${characters || "[À compléter]"}
+- Ton général: ${getToneName(tone) || "[À compléter]"}
+
+STRUCTURE DU JEU:
+- Nombre d'énigmes/défis: ${puzzleCount || "[À compléter]"}
+- Progression: ${getProgressionName(progression) || "[À compléter]"}
+- Types de mécanismes: ${mechanisms || "[À compléter]"}
+- Équilibre énigmes physiques/intellectuelles: ${balance || "[À compléter]"}
+- Points de blocage et indices: ${hints || "[À compléter]"}
+
+ASPECTS PRATIQUES:
+- Espace et contraintes matérielles: ${space || "[À compléter]"}
+- Budget et ressources: ${budget || "[À compléter]"}
+- Participants et équipes: ${participants || "[À compléter]"}
+- Outils numériques: ${digital || "[À compléter]"}
+- Adaptabilité: ${adaptability || "[À compléter]"}
+
+ÉVALUATION ET SUIVI:
+- Méthodes d'évaluation: ${assessment || "[À compléter]"}
+- Système de débriefing: ${debriefing || "[À compléter]"}
+- Extensions possibles: ${extension || "[À compléter]"}
+- Critères de réussite: ${criteria || "[À compléter]"}
+- Documentation pédagogique: ${documentation || "[À compléter]"}
+
+Merci de me fournir un scénario détaillé qui inclut:
+1. Un titre accrocheur pour l'escape game
+2. Une introduction narrative complète
+3. La liste des énigmes avec leur description détaillée
+4. Le matériel nécessaire pour chaque énigme
+5. Les solutions et indices pour chaque énigme
+6. Un guide de mise en place pour l'animateur
+7. Des suggestions pour le débriefing pédagogique
+8. Des variantes possibles selon le niveau des participants
+
+Le scénario doit être à la fois ludique et pédagogiquement pertinent, avec un équilibre entre divertissement et apprentissage.`;
+
+            // Affichage du prompt
+            document.getElementById('promptOutput').textContent = prompt;
+            document.getElementById('outputContainer').style.display = 'block';
+
+            // Scroll jusqu'au résultat
+            document.getElementById('outputContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Fonction pour copier le prompt dans le presse-papier
+        function copyToClipboard() {
+            const promptText = document.getElementById('promptOutput').textContent;
+            navigator.clipboard.writeText(promptText).then(function() {
+                alert('Prompt copié dans le presse-papier !');
+            }, function(err) {
+                console.error('Erreur lors de la copie: ', err);
+            });
+        }
+
+        // Fonctions utilitaires pour obtenir les noms complets
+        function getToneName(tone) {
+            const tones = {
+                'serious': 'Sérieux',
+                'humorous': 'Humoristique',
+                'mysterious': 'Mystérieux',
+                'adventurous': 'Aventureux',
+                'educational': 'Éducatif'
+            };
+            return tones[tone] || tone;
+        }
+
+        function getProgressionName(progression) {
+            const progressions = {
+                'linear': 'Linéaire',
+                'nonlinear': 'Non-linéaire',
+                'mixed': 'Mixte'
+            };
+            return progressions[progression] || progression;
+        }
+    </script>
+</body>
+</html>
+
